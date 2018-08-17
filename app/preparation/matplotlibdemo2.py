@@ -150,6 +150,7 @@ def annotation():
     plt.text(-3.7, 3, r'\mu\ \sigma_i\ \alpha_t', fontdict={'size': 16,
                                                             'color': 'r'})
     plt.show()
+    plt.show()
 
 
 def axis_tick():
@@ -395,4 +396,4 @@ def animation():
 
 
 if __name__ == '__main__':
-    animation()
+    scatter()
