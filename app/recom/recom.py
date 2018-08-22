@@ -3,6 +3,16 @@ from app import approot
 import pandas as pd
 import numpy as np
 import os
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+from urllib import request
+import re
+import logging
+import json
+
+logging.basicConfig(level=logging.DEBUG)
+
+ESF_URL = 'http://mapi.house365.com/taofang/v1.0/esf/?method=getHouseListNew&name=HouseSellEX&city=nj&id='
 
 
 def readFile(file):
@@ -27,14 +37,126 @@ def readCsv(file):
     pd.set_option('display.width', 300)  # 设置字符显示宽度
     pd.set_option('display.max_rows', None)  # 设置显示最大行
     pd.set_option('display.max_columns', None)  # 设置显示最大列，None为显示所有列
-    data = pd.read_csv(file, usecols=[6, 36, 39])
+    data = pd.read_csv(file, usecols=[0, 1, 2])
     data = data.dropna(thresh=2)
     data.columns = ['deviceId', 'searchKey', 'contentId']
     data = data.groupby('deviceId')
-    for name, group in data:
-        print((name, group))
+    # value = data.get_group('865584030908872')
+    value = data.get_group('99001234010168')
+    return value.iloc[:, 1].dropna(how='any'), value.iloc[:, 2].dropna(how='any')
+    # for name, group in data:
+    #     print((name, group))
+
+
+def wordCloudDemo(words):
+    # file = approot.get_root('constitution.txt')
+    cloud = WordCloud(
+        # 设置字体，不指定就会出现乱码
+        font_path="HYQiHei-25J.ttf",
+    )
+    word = cloud.generate(words)
+    plt.imshow(word)
+    plt.axis('off')
+    plt.title('search key world cloud')
+    plt.show()
+
+
+def getContentNum(contentId):
+    result = '111'
+    for content in contentId:
+        if re.match(r'\d+|1-\d+', content):
+            result += ',' + re.match(r'(1-)?(\d+)', content).group(2)
+    return result
+
+
+def searchUrl(contentids):
+    df = pd.DataFrame(columns=['id', 'price', 'blockname'], dtype=np.int8)
+    logging.debug(ESF_URL + contentIds)
+    response = request.urlopen(ESF_URL + contentIds)
+    response = response.read().decode('utf-8')
+    logging.info(response)
+    if response != '-1':
+        jsonObjects = json.loads(response)
+        for i, object in enumerate(jsonObjects):
+            df.loc[i] = [object['id'], int(object['price']), object['blockinfo']['blockname']]
+    return df
+
+
+def drawPicture(df):
+
+
+    one = df[df.price < 100].count()
+    one2two = df[(100 <= df.price) & (df.price < 200)].count()
+    two2three = df[(200 <= df.price) & (df.price < 300)].count()
+    three2four = df[(300 <= df.price) & (df.price < 400)].count()
+    four2five = df[(400 <= df.price) & (df.price < 500)].count()
+    five2six = df[(500 <= df.price) & (df.price < 600)].count()
+    six2seven = df[(600 <= df.price) & (df.price < 700)].count()
+    seven2eight = df[(700 <= df.price) & (df.price < 800)].count()
+    eight2nine = df[(800 <= df.price) & (df.price < 900)].count()
+
+    labels = (
+        '100', '100~200', '200~300', '300~400', '400~500', '500~600', '600~700', '700~800', '800~900')
+    sizes = [one.price, one2two.price, two2three.price, three2four.price, four2five.price, five2six.price,
+             six2seven.price, seven2eight.price, eight2nine.price]
+    plt.pie(sizes, labels=labels, autopct='%1.1f%%',  startangle=90)
+    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    plt.title('price pie chart')
+    plt.show()
+
+    pass
+
+
+def test():
+    # Pie chart, where the slices will be ordered and plotted counter-clockwise:
+    labels = 'Frogs', 'Hogs', 'Dogs', 'Logs'
+    sizes = [15, 30, 45, 10]
+    explode = (0, 0.1, 0, 0)  # only "explode" the 2nd slice (i.e. 'Hogs')
+
+    plt.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%',
+            shadow=True, startangle=90)
+    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+    plt.show()
+
+
+def test2():
+    # 用subplot()方法绘制多幅图形
+    plt.figure(figsize=(6, 6), dpi=80)
+    # 创建第一个画板
+    plt.figure(1)
+    # 将第一个画板划分为2行1列组成的区块，并获取到第一块区域
+    ax1 = plt.subplot(211)
+
+    # 在第一个子区域中绘图
+    labels = 'Frogs', 'Hogs', 'Dogs', 'Logs'
+    sizes = [15, 30, 45, 10]
+    explode = (0, 0.1, 0, 0)  # only "explode" the 2nd slice (i.e. 'Hogs')
+
+    plt.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%',
+            shadow=True, startangle=90)
+    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    # 选中第二个子区域，并绘图
+    ax2 = plt.subplot(212)
+    plt.plot([2, 4, 6], [7, 9, 15])
+
+    plt.figure(1)
+
+    # 为第一个画板的第一个区域添加标题
+    ax1.set_title("第一个画板中第一个区域")
+    ax2.set_title("第一个画板中第二个区域")
+
+    # 调整每隔子图之间的距离
+    plt.tight_layout()
+    plt.show()
 
 
 if __name__ == '__main__':
-    file = approot.get_root('select___from_DWB_DA_APP_STATISTICS_wher.csv')
-    readCsv(file=file)
+    file = approot.get_root('select_DEVICE_ID_SEARCH_KEY_CONTEXT_ID_f.csv')
+    searchKey, contentId = readCsv(file=file)
+    # wordCloudDemo(' '.join(searchKey.values))
+    contentIds = getContentNum(contentId)
+    df = searchUrl(contentIds)
+    drawPicture(df)
+    # test2()
+    # test()
