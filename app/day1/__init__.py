@@ -14,7 +14,7 @@ def print_parameter(X, Y):
 
 
 if __name__ == '__main__':
-    path = approot.get_root('Data.csv')
+    path = approot.get_dataset('Data.csv')
     dataset = pd.read_csv(path)
     X = dataset.iloc[:, :-1].values
     Y = dataset.iloc[:, 3].values

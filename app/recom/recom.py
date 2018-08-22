@@ -4,6 +4,8 @@ import pandas as pd
 import numpy as np
 import os
 from wordcloud import WordCloud
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from urllib import request
 import re
@@ -42,10 +44,15 @@ def readCsv(file):
     data.columns = ['deviceId', 'searchKey', 'contentId']
     data = data.groupby('deviceId')
     # value = data.get_group('865584030908872')
-    value = data.get_group('99001234010168')
-    return value.iloc[:, 1].dropna(how='any'), value.iloc[:, 2].dropna(how='any')
-    # for name, group in data:
-    #     print((name, group))
+    # value = data.get_group('99001234010168')
+    # return value.iloc[:, 1].dropna(how='any'), value.iloc[:, 2].dropna(how='any')
+    for i, (name, group) in enumerate(data):
+        if i == 100:
+            break
+        contentIds = getContentNum(group.iloc[:, 2].dropna(how='any'))
+        df = searchUrl(contentIds)
+        if not df.empty:
+            drawPicture(df, name)
 
 
 def wordCloudDemo(words):
@@ -69,7 +76,7 @@ def getContentNum(contentId):
     return result
 
 
-def searchUrl(contentids):
+def searchUrl(contentIds):
     df = pd.DataFrame(columns=['id', 'price', 'blockname'], dtype=np.int8)
     logging.debug(ESF_URL + contentIds)
     response = request.urlopen(ESF_URL + contentIds)
@@ -82,9 +89,16 @@ def searchUrl(contentids):
     return df
 
 
-def drawPicture(df):
+def drawPicture(df, name):
+    # 用subplot()方法绘制多幅图形
+    plt.figure(figsize=(6, 6), dpi=80)
+    # 创建第一个画板
+    plt.figure(1)
+    # 将第一个画板划分为2行1列组成的区块，并获取到第一块区域
+    ax1 = plt.subplot(211)
+    ax1.clear()
 
-
+    # 在第一个子区域中绘图
     one = df[df.price < 100].count()
     one2two = df[(100 <= df.price) & (df.price < 200)].count()
     two2three = df[(200 <= df.price) & (df.price < 300)].count()
@@ -99,12 +113,34 @@ def drawPicture(df):
         '100', '100~200', '200~300', '300~400', '400~500', '500~600', '600~700', '700~800', '800~900')
     sizes = [one.price, one2two.price, two2three.price, three2four.price, four2five.price, five2six.price,
              six2seven.price, seven2eight.price, eight2nine.price]
-    plt.pie(sizes, labels=labels, autopct='%1.1f%%',  startangle=90)
+    plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
     plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
     plt.title('price pie chart')
+
+    # 选中第二个子区域，并绘图
+    ax2 = plt.subplot(212)
+
+    cloud = WordCloud(
+        # 设置字体，不指定就会出现乱码
+        font_path="HYQiHei-25J.ttf",
+        background_color="white",
+    )
+    blockName = df.iloc[:, 2]
+    word = cloud.generate(" ".join(blockName))
+    plt.imshow(word)
+    plt.axis('off')
     plt.show()
 
-    pass
+    # 为第一个画板的第一个区域添加标题
+    ax1.set_title("price range")
+    ax2.set_title("block name word cloud")
+
+    # 调整每隔子图之间的距离
+    plt.tight_layout()
+    filename = approot.get_picture(name + '.jpg')
+    fig = plt.gcf()
+    plt.show()
+    fig.savefig(filename)
 
 
 def test():
@@ -122,7 +158,7 @@ def test():
 
 def test2():
     # 用subplot()方法绘制多幅图形
-    plt.figure(figsize=(6, 6), dpi=80)
+    plt.figure(figsize=(12, 12), dpi=80)
     # 创建第一个画板
     plt.figure(1)
     # 将第一个画板划分为2行1列组成的区块，并获取到第一块区域
@@ -152,11 +188,11 @@ def test2():
 
 
 if __name__ == '__main__':
-    file = approot.get_root('select_DEVICE_ID_SEARCH_KEY_CONTEXT_ID_f.csv')
+    file = approot.get_dataset('select_DEVICE_ID_SEARCH_KEY_CONTEXT_ID_f.csv')
     searchKey, contentId = readCsv(file=file)
     # wordCloudDemo(' '.join(searchKey.values))
     contentIds = getContentNum(contentId)
-    df = searchUrl(contentIds)
-    drawPicture(df)
+    # df = searchUrl(contentIds)
+    # drawPicture(df)
     # test2()
     # test()

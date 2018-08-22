@@ -188,7 +188,7 @@ def save_model():
     #     print(clf2.predict(X[0:1]))
 
     # method 2:joblib
-    pickle_file = approot.get_root('joblib.pickle')
+    pickle_file = approot.get_dataset('joblib.pickle')
     # joblib.dump(clf,pickle_file)
 
     clf3 = joblib.load(pickle_file)
