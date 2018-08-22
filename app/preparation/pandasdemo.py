@@ -216,4 +216,4 @@ def merge():
 
 
 if __name__ == '__main__':
-    concat()
+    import_export()
