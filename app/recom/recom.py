@@ -12,6 +12,7 @@ from urllib import request
 import re
 import logging
 import json
+import matplotlib.font_manager as fm
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -72,8 +73,8 @@ def wordCloudDemo(words):
 def getContentNum(contentId):
     result = '111'
     for content in contentId:
-        if re.match(r'\d+|1-\d+', content):
-            result += ',' + re.match(r'(1-)?(\d+)', content).group(2)
+        if re.match(r'\d+|1-\d+', str(content)):
+            result += ',' + re.match(r'(1-)?(\d+)', str(content)).group(2)
     return result
 
 
@@ -92,11 +93,11 @@ def searchUrl(contentIds):
 
 def drawPicture(df, name):
     # 用subplot()方法绘制多幅图形
-    plt.figure(figsize=(6, 6), dpi=80)
+    plt.figure(figsize=(12, 24), dpi=80)
     # 创建第一个画板
     plt.figure(1)
     # 将第一个画板划分为2行1列组成的区块，并获取到第一块区域
-    ax1 = plt.subplot(311)
+    ax1 = plt.subplot(411)
     ax1.clear()
 
     # 在第一个子区域中绘图
@@ -119,7 +120,7 @@ def drawPicture(df, name):
     plt.title('price pie chart')
 
     # 选中第二个子区域，并绘图
-    ax2 = plt.subplot(312)
+    ax2 = plt.subplot(412)
 
     cloud = WordCloud(
         # 设置字体，不指定就会出现乱码
@@ -131,18 +132,35 @@ def drawPicture(df, name):
     plt.imshow(word)
     plt.axis('off')
 
-    ax3 = plt.subplot(313)
+    ax3 = plt.subplot(413)
     ax3.clear()
     plt.plot(np.arange(df['price'].count()), df.iloc[:, 1], marker='o', mfc='w')
+
+    ax4 = plt.subplot(414)
+    ax4.clear()
+    font = fm.FontProperties(fname='HYQiHei-25J.ttf')
+    print (df)
+    df = df.groupby('blockname')
+
+    name_list = list()
+    num_list = list()
+    for blockName, group in df:
+        name_list.append(blockName)
+        num_list.append(len(group))
+
+    plt.bar(range(len(num_list)), num_list, color='rgb', tick_label=name_list)
+    plt.xticks(fontproperties=font)
+    plt.show()
 
     # 为第一个画板的第一个区域添加标题
     ax1.set_title("price range")
     ax2.set_title("block name word cloud")
     ax3.set_title("price broken line")
+    ax4.set_title("block visit count")
 
     # 调整每隔子图之间的距离
     plt.tight_layout()
-    filename = approot.get_picture(name + '.jpg')
+    filename = approot.get_picture(str(name) + '.jpg')
     fig = plt.gcf()
     plt.show()
     fig.savefig(filename)
@@ -192,12 +210,24 @@ def test2():
     plt.show()
 
 
+def test3():
+    font = fm.FontProperties(fname='HYQiHei-25J.ttf')
+
+    name_list = ['星期一', '星期二', '星期三', '星期四']
+    num_list = [1.5, 0.6, 7.8, 6]
+    plt.bar(range(len(num_list)), num_list, color='rgb', tick_label=name_list)
+    plt.xticks(fontproperties=font)
+    plt.show()
+
+
 if __name__ == '__main__':
     file = approot.get_dataset('select_DEVICE_ID_CONTEXT_ID_from_DWB_DA_.csv')
-    searchKey, contentId = readCsv(file=file)
+    readCsv(file=file)
     # wordCloudDemo(' '.join(searchKey.values))
-    contentIds = getContentNum(contentId)
+    # contentIds = getContentNum(contentId)
     # df = searchUrl(contentIds)
     # drawPicture(df)
     # test2()
     # test()
+
+    # test3()
