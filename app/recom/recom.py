@@ -5,6 +5,7 @@ import numpy as np
 import os
 from wordcloud import WordCloud
 import matplotlib
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from urllib import request
@@ -39,9 +40,9 @@ def readCsv(file):
     pd.set_option('display.width', 300)  # 设置字符显示宽度
     pd.set_option('display.max_rows', None)  # 设置显示最大行
     pd.set_option('display.max_columns', None)  # 设置显示最大列，None为显示所有列
-    data = pd.read_csv(file, usecols=[0, 1, 2])
+    data = pd.read_csv(file, usecols=[0, 1])
     data = data.dropna(thresh=2)
-    data.columns = ['deviceId', 'searchKey', 'contentId']
+    data.columns = ['deviceId', 'contentId']
     data = data.groupby('deviceId')
     # value = data.get_group('865584030908872')
     # value = data.get_group('99001234010168')
@@ -49,7 +50,7 @@ def readCsv(file):
     for i, (name, group) in enumerate(data):
         if i == 100:
             break
-        contentIds = getContentNum(group.iloc[:, 2].dropna(how='any'))
+        contentIds = getContentNum(group.iloc[:, 1].dropna(how='any'))
         df = searchUrl(contentIds)
         if not df.empty:
             drawPicture(df, name)
@@ -95,7 +96,7 @@ def drawPicture(df, name):
     # 创建第一个画板
     plt.figure(1)
     # 将第一个画板划分为2行1列组成的区块，并获取到第一块区域
-    ax1 = plt.subplot(211)
+    ax1 = plt.subplot(311)
     ax1.clear()
 
     # 在第一个子区域中绘图
@@ -118,7 +119,7 @@ def drawPicture(df, name):
     plt.title('price pie chart')
 
     # 选中第二个子区域，并绘图
-    ax2 = plt.subplot(212)
+    ax2 = plt.subplot(312)
 
     cloud = WordCloud(
         # 设置字体，不指定就会出现乱码
@@ -129,11 +130,15 @@ def drawPicture(df, name):
     word = cloud.generate(" ".join(blockName))
     plt.imshow(word)
     plt.axis('off')
-    plt.show()
+
+    ax3 = plt.subplot(313)
+    ax3.clear()
+    plt.plot(np.arange(df['price'].count()), df.iloc[:, 1], marker='o', mfc='w')
 
     # 为第一个画板的第一个区域添加标题
     ax1.set_title("price range")
     ax2.set_title("block name word cloud")
+    ax3.set_title("price broken line")
 
     # 调整每隔子图之间的距离
     plt.tight_layout()
@@ -188,7 +193,7 @@ def test2():
 
 
 if __name__ == '__main__':
-    file = approot.get_dataset('select_DEVICE_ID_SEARCH_KEY_CONTEXT_ID_f.csv')
+    file = approot.get_dataset('select_DEVICE_ID_CONTEXT_ID_from_DWB_DA_.csv')
     searchKey, contentId = readCsv(file=file)
     # wordCloudDemo(' '.join(searchKey.values))
     contentIds = getContentNum(contentId)
