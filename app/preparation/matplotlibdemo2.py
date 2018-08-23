@@ -396,4 +396,4 @@ def animation():
 
 
 if __name__ == '__main__':
-    scatter()
+    bar()

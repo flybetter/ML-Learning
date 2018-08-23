@@ -132,25 +132,22 @@ def drawPicture(df, name):
     plt.imshow(word)
     plt.axis('off')
 
-    ax3 = plt.subplot(413)
-    ax3.clear()
-    plt.plot(np.arange(df['price'].count()), df.iloc[:, 1], marker='o', mfc='w')
-
-    ax4 = plt.subplot(414)
+    ax4 = plt.subplot(413)
     ax4.clear()
     font = fm.FontProperties(fname='HYQiHei-25J.ttf')
-    print (df)
-    df = df.groupby('blockname')
-
+    dfgroup = df.groupby('blockname')
     name_list = list()
     num_list = list()
-    for blockName, group in df:
+    for blockName, group in dfgroup:
         name_list.append(blockName)
         num_list.append(len(group))
 
     plt.bar(range(len(num_list)), num_list, color='rgb', tick_label=name_list)
     plt.xticks(fontproperties=font)
-    plt.show()
+
+    ax3 = plt.subplot(414)
+    ax3.clear()
+    plt.plot(np.arange(df['price'].count()), df.iloc[:, 1], marker='o', mfc='w')
 
     # 为第一个画板的第一个区域添加标题
     ax1.set_title("price range")
