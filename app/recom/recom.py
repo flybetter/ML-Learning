@@ -46,7 +46,6 @@ def readCsv(file):
     data.columns = ['deviceId', 'contentId']
     data = data.groupby('deviceId')
     # value = data.get_group('865584030908872')
-    # value = data.get_group('99001234010168')
     # return value.iloc[:, 1].dropna(how='any'), value.iloc[:, 2].dropna(how='any')
     for i, (name, group) in enumerate(data):
         if i == 100:
