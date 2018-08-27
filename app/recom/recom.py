@@ -48,8 +48,8 @@ def readCsv(file):
     # value = data.get_group('865584030908872')
     # return value.iloc[:, 1].dropna(how='any'), value.iloc[:, 2].dropna(how='any')
     for i, (name, group) in enumerate(data):
-        if i == 100:
-            break
+        # if i == 100:
+        #     break
         contentIds = getContentNum(group.iloc[:, 1].dropna(how='any'))
         df = searchUrl(contentIds)
         if not df.empty:
@@ -80,13 +80,16 @@ def getContentNum(contentId):
 def searchUrl(contentIds):
     df = pd.DataFrame(columns=['id', 'price', 'blockname'], dtype=np.int8)
     logging.debug(ESF_URL + contentIds)
-    response = request.urlopen(ESF_URL + contentIds)
-    response = response.read().decode('utf-8')
-    logging.info(response)
-    if response != '-1':
-        jsonObjects = json.loads(response)
-        for i, object in enumerate(jsonObjects):
-            df.loc[i] = [object['id'], int(object['price']), object['blockinfo']['blockname']]
+
+    for i in range(0, len(contentIds), 350):
+        tempContentIds = contentIds[i:i + 350]
+        response = request.urlopen(ESF_URL + tempContentIds)
+        response = response.read().decode('utf-8')
+        logging.info(response)
+        if response != '-1':
+            jsonObjects = json.loads(response)
+            for i, object in enumerate(jsonObjects):
+                df.loc[i] = [object['id'], float(object['price']), object['blockinfo']['blockname']]
     return df
 
 
@@ -217,7 +220,9 @@ def test3():
 
 
 if __name__ == '__main__':
-    file = approot.get_dataset('select_DEVICE_ID_CONTEXT_ID_from_DWB_DA_.csv')
+    # select_DEVICE_ID_CONTEXT_ID_from_DWB_DA_8_27.csv  设备id 864621038192553 的行为记录
+
+    file = approot.get_dataset('select_DEVICE_ID_CONTEXT_ID__from_DWB_DA.csv')
     readCsv(file=file)
     # wordCloudDemo(' '.join(searchKey.values))
     # contentIds = getContentNum(contentId)
@@ -225,5 +230,4 @@ if __name__ == '__main__':
     # drawPicture(df)
     # test2()
     # test()
-
     # test3()
