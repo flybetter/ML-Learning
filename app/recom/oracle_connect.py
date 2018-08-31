@@ -1,12 +1,15 @@
 # coding=utf-8
 import cx_Oracle
 import os
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
 
 HOST = 'app/app@202.102.83.165/app'
 
-ORACL_SQL = "select ID,BLOCKSHOWNAME from dwb_ras_sell_nj_all sample(20)" \
+ORACL_SQL = "select ID,BLOCKSHOWNAME from dwb_ras_sell_nj_all sample(50)" \
             " where BLOCKSHOWNAME in %s and esta =1 and PRICE between %d and %d and rownum<10"
 
 
@@ -20,13 +23,11 @@ def get_data(blocknames, lowPrice, highPrice):
     blocknames = tuple(blocknames)
     blocknames = "{}".format(blocknames)
     sql = ORACL_SQL % (blocknames, lowPrice, highPrice)
-    print(sql)
+    logging.debug(sql)
     connection, cursor = oracle_connection()
     cursor.execute(sql)
     data = cursor.fetchall()
     oracle_close(connection, cursor)
-    for object in data:
-        print(object)
     return data
 
 
