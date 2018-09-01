@@ -88,8 +88,9 @@ def searchUrl(contentIds):
         logging.info(response)
         if response != '-1':
             jsonObjects = json.loads(response)
-            for i, object in enumerate(jsonObjects):
-                df.loc[i] = [object['id'], float(object['price']), object['blockinfo']['blockname']]
+            for object in jsonObjects:
+                df = df.append(pd.Series([object['id'], float(object['price']), object['blockinfo']['blockname']],
+                                         index=list(df.columns)), ignore_index=True)
     return df
 
 
@@ -159,6 +160,8 @@ def drawPicture(df, name):
 
     # 调整每隔子图之间的距离
     plt.tight_layout()
+    # 添加关联关系
+    name = relation(str(name))
     filename = approot.get_picture(str(name) + '.jpg')
     fig = plt.gcf()
     plt.show()
@@ -207,6 +210,35 @@ def test2():
     # 调整每隔子图之间的距离
     plt.tight_layout()
     plt.show()
+
+
+def relation(deviceId):
+    relations = dict()
+    relations["15077827585"] = "864621038192553"
+    relations["13770324189"] = "353460084288793"
+    relations["13675189197"] = "865970030389108"
+    relations["13601901399"] = "860980031132311"
+    relations["17855106781"] = "865970034361434"
+    relations["15905175211"] = "866533031935839"
+    relations["13390901599"] = "861918034499591"
+    relations["15951001888"] = "358520088841320"
+    relations["15850780069"] = "869885031905924"
+    relations["13851499283"] = "867960033998367"
+    relations["13401952869"] = "864284035078679"
+    relations["18951603156"] = "A00000751717EE"
+    relations["18051082210"] = "867455031299405"
+    relations["15295123506"] = "352324072851122"
+    relations["15105198373"] = "866318037044764"
+    relations["13913993926"] = "863184037700430"
+    relations["17302584660"] = "864032031775743"
+    relations["18055500055"] = "865032030154899"
+
+    flag = "nothing"
+    for key, value in relations.items():
+        if value == deviceId:
+            flag = key
+            break
+    return flag
 
 
 def test3():
