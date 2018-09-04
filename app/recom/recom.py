@@ -161,7 +161,7 @@ def drawPicture(df, name):
     # 调整每隔子图之间的距离
     plt.tight_layout()
     # 添加关联关系
-    name = relation(str(name))
+    name = relation_2(str(name))
     filename = approot.get_picture(str(name) + '.jpg')
     fig = plt.gcf()
     plt.show()
@@ -215,6 +215,7 @@ def test2():
 def relation(deviceId):
     relations = dict()
     relations["15077827585"] = "864621038192553"
+
     relations["13770324189"] = "353460084288793"
     relations["13675189197"] = "865970030389108"
     relations["13601901399"] = "860980031132311"
@@ -241,6 +242,30 @@ def relation(deviceId):
     return flag
 
 
+def relation_2(deviceId):
+
+    relations = dict()
+    relations["13901584306"] = "868299031022147"
+    relations["13776649100"] = "861005038488224"
+    relations["13813872389"] = "866783039889666"
+    relations["13160083760"] = "866089030512111"
+    relations["13813098200"] = "869296028702318"
+    relations["13072513998"] = "862913030934831"
+    relations["18913985286"] = "866953031125431"
+    relations["15861810830"] = "868860038884787"
+    relations["15077827585"] = "864621038192553"
+    relations["18551823217"] = "862119035787782"
+    relations["13951937782"] = "864033034181608"
+    relations["15077827585"] = "864621038192553"
+
+    flag = "nothing"
+    for key, value in relations.items():
+        if value == deviceId:
+            flag = key
+            break
+    return flag
+
+
 def test3():
     font = fm.FontProperties(fname='HYQiHei-25J.ttf')
 
@@ -254,7 +279,7 @@ def test3():
 if __name__ == '__main__':
     # select_DEVICE_ID_CONTEXT_ID_from_DWB_DA_8_27.csv  设备id 864621038192553 的行为记录
 
-    file = approot.get_dataset('select_DEVICE_ID_CONTEXT_ID__from_DWB_DA.csv')
+    file = approot.get_dataset('select_DEVICE_ID_CONTEXT_ID__from_DWB_DA_2018-9-4.csv')
     readCsv(file=file)
     # wordCloudDemo(' '.join(searchKey.values))
     # contentIds = getContentNum(contentId)
